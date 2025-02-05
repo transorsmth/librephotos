@@ -32,9 +32,7 @@ FACE_CLASSIFY_COLUMNS = [
 
 def cluster_faces(user, inferred=True):
     # Fetch distinct persons associated with the user's faces
-    persons = [
-        p.id for p in Person.objects.filter(faces__photo__owner=user).distinct().all()
-    ]
+    persons = [p.id for p in Person.objects.filter(faces__photo__owner=user).distinct()]
 
     # Create a color mapping for each person
     p2c = dict(zip(persons, sns.color_palette(n_colors=len(persons)).as_hex()))
