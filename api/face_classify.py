@@ -39,10 +39,10 @@ def cluster_faces(user, inferred=True):
     face_encoding = []
     # Fetch faces that belong to the user and are not deleted
     faces = Face.objects.filter(Q(photo__owner=user) & Q(deleted=False))
-    paginator = Paginator(faces, 1000000)
+    paginator = Paginator(faces, 5000)
 
     for page in range(1, paginator.num_pages + 1):
-        for face in paginator.page(page).object_list:
+        for face in paginator.page(page).object_list.all():
             if ((not face.person) or inferred) and face.encoding:
                 face_encoding.append(face.get_encoding_array())
 
