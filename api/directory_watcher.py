@@ -557,14 +557,7 @@ def scan_faces(user, job_id: UUID, full_scan=False):
         db.connections.close_all()
 
         for photo in existing_photos:
-            failed = False
-            try:
-                photo._extract_faces()
-            except Exception as err:
-                util.logger.exception("An error occurred: ")
-                print("[ERR]: {}".format(err))
-                failed = True
-            update_scan_counter(job_id, failed)
+            AsyncTask(scan_faces_job, photo, job_id).run()
     except Exception as err:
         util.logger.exception("An error occurred: ")
         print(f"[ERR]: {err}")
@@ -572,3 +565,15 @@ def scan_faces(user, job_id: UUID, full_scan=False):
 
     generate_face_embeddings(user, uuid.uuid4())
     cluster_all_faces(user, uuid.uuid4())
+
+
+def scan_faces_job(photo: Photo, job_id: UUID):
+    failed = False
+    try:
+        photo.refresh_from_db()
+        photo._extract_faces()
+    except Exception as err:
+        util.logger.exception("An error occurred: ")
+        print(f"[ERR]: {err}")
+        failed = True
+    update_scan_counter(job_id, failed)
