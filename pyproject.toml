@@ -14,7 +14,7 @@ select = [
     "PL",   # pylint rules
 ]
 
-ignore = ["E501", "E203", "E231"]
+lint.ignore = ["E501", "E203", "E231"]
 
 [tool.ruff.format]
 quote-style = "double"

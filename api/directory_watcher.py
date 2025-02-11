@@ -555,14 +555,17 @@ def scan_faces(user, job_id: UUID, full_scan=False):
         lrj.progress_target = existing_photos.count()
         lrj.save()
         db.connections.close_all()
-
+        jobs = []
         for photo in existing_photos:
-            AsyncTask(scan_faces_job, photo, job_id).run()
+            job = AsyncTask(scan_faces_job, photo, job_id)
+            jobs.append(job)
+            job.run()
+        for job in jobs:
+            job.result()
     except Exception as err:
         util.logger.exception("An error occurred: ")
         print(f"[ERR]: {err}")
         lrj.failed = True
-
     generate_face_embeddings(user, uuid.uuid4())
     cluster_all_faces(user, uuid.uuid4())
 

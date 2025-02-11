@@ -5,6 +5,7 @@ import gevent
 import numpy as np
 import PIL
 from flask import Flask, request
+from gevent.pool import Pool
 from gevent.pywsgi import WSGIServer
 
 app = Flask(__name__)
@@ -18,7 +19,7 @@ def log(message):
 
 @app.route("/face-encodings", methods=["POST"])
 def create_face_encodings():
-    global last_request_time
+    global last_request_time  # noqa: PLW0603
     # Update last request time
     last_request_time = time.time()
 
@@ -43,7 +44,7 @@ def create_face_encodings():
 
 @app.route("/face-locations", methods=["POST"])
 def create_face_locations():
-    global last_request_time
+    global last_request_time  # noqa: PLW0603
     # Update last request time
     last_request_time = time.time()
 
@@ -67,6 +68,7 @@ def health():
 
 if __name__ == "__main__":
     log("service starting")
-    server = WSGIServer(("0.0.0.0", 8005), app)
+    pool = Pool(20)
+    server = WSGIServer(("0.0.0.0", 8005), app, spawn=pool)
     server_thread = gevent.spawn(server.serve_forever)
     gevent.joinall([server_thread])
